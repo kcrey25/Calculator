@@ -1,0 +1,30 @@
+.behind {
+  background: #c5c5c5;
+  height: 100vh;
+}
+
+.buttons {
+  padding: 0 15px;
+  display: flex;
+  flex: 1 0 20%;
+  flex-wrap: wrap;
+}
+
+.calc {
+  width: 346px;
+  margin: 0 auto;
+  background: black;
+  border-radius: 3px;
+  box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.2);
+  padding-bottom: 15px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.flex-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  margin-left: 25%;
+}
