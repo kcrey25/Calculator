@@ -20,11 +20,3 @@
   -moz-user-select: none;
   -webkit-user-select: none;
 }
-
-.flex-container {
-  width: 100%;
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  margin-left: 25%;
-}

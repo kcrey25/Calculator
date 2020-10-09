@@ -5,6 +5,7 @@ import '../styles/components/Calculator.css';
 
 const upperMax = 10000000000;
 const lowerMax = -1000000000;
+const operations = ['x', '/', '+', '-'];
 
 const Calculator = () => {
   const [mainDisplay, setMainDisplay] = React.useState<number>(0);
@@ -18,7 +19,9 @@ const Calculator = () => {
       mainDisplay !== 0 &&
       lastPress !== '+' &&
       lastPress !== '-' &&
-      lastPress != 'clr'
+      lastPress !== 'x' &&
+      lastPress !== '/' &&
+      lastPress !== '='
     ) {
       const newNum = parseInt(`${mainDisplay}${num}`);
       if (newNum < upperMax && newNum > lowerMax) setMainDisplay(newNum);
@@ -28,78 +31,99 @@ const Calculator = () => {
         setHistory('');
         setLeftSide(0);
         setOperator('');
+        setLastPress('');
       }
     }
     setLastPress(num.toString());
   };
 
-  const oppClick = (opp: string) => {
-    switch (opp) {
+  const onClear = () => {
+    setMainDisplay(0);
+    setHistory('0');
+    setLeftSide(0);
+    setOperator('');
+    setLastPress('');
+  };
+
+  const onEqual = () => {
+    switch (operator) {
       case '+':
-        if (mainDisplay !== 0) {
-          if (lastPress === '=') {
-            setHistory(`${mainDisplay} +`);
-            setLeftSide(mainDisplay);
-          } else if (!isNaN(parseInt(lastPress)) && operator === '-') {
-            setHistory(`${history} ${mainDisplay} +`);
-            setLeftSide(leftSide - mainDisplay);
-            setMainDisplay(leftSide - mainDisplay);
-          } else if (leftSide !== 0) {
-            const added = mainDisplay + leftSide;
-            setLeftSide(added);
-            setMainDisplay(added);
-            setHistory(`${history} ${mainDisplay} +`);
-          } else {
-            setLeftSide(mainDisplay);
-            setHistory(`${mainDisplay} ${opp}`);
-          }
-          setOperator('+');
-        }
-        setLastPress(opp);
+        setHistory(`${history} ${mainDisplay} =`);
+        setMainDisplay(leftSide + mainDisplay);
+        setLeftSide(mainDisplay);
         break;
       case '-':
-        if (mainDisplay !== 0) {
-          if (lastPress === '=') {
-            setHistory(`${mainDisplay} -`);
-            setLeftSide(mainDisplay);
-          } else if (!isNaN(parseInt(lastPress)) && operator === '+') {
-            setHistory(`${history} ${mainDisplay} -`);
-            setLeftSide(leftSide + mainDisplay);
-            setMainDisplay(leftSide + mainDisplay);
-          } else if (leftSide !== 0) {
-            const subtracted = leftSide - mainDisplay;
-            setLeftSide(subtracted);
-            setMainDisplay(subtracted);
-            setHistory(`${history} ${mainDisplay} -`);
-          } else {
-            setLeftSide(mainDisplay);
-            setHistory(`${mainDisplay} ${opp}`);
-          }
-          setOperator('-');
-        }
-        setLastPress(opp);
+        setHistory(`${history} ${mainDisplay} =`);
+        setMainDisplay(leftSide - mainDisplay);
+        setLeftSide(mainDisplay);
         break;
-      case '=':
-        if (operator === '+') {
-          setHistory(`${history} ${mainDisplay} =`);
-          setMainDisplay(leftSide + mainDisplay);
-          setLeftSide(mainDisplay);
-        } else if (operator === '-') {
-          setHistory(`${history} ${mainDisplay} =`);
-          setMainDisplay(leftSide - mainDisplay);
-          setLeftSide(mainDisplay);
-        }
-        setOperator('=');
-        setLastPress(opp);
+      case 'x':
+        setHistory(`${history} ${mainDisplay} =`);
+        setMainDisplay(leftSide * mainDisplay);
+        setLeftSide(mainDisplay);
         break;
-      case 'clr':
-        setMainDisplay(0);
-        setHistory('0');
-        setLeftSide(0);
-        setOperator('');
-        setLastPress(opp);
+      case '/':
+        setHistory(`${history} ${mainDisplay} =`);
+        setMainDisplay(leftSide / mainDisplay);
+        setLeftSide(mainDisplay);
         break;
     }
+    setOperator('=');
+    setLastPress('=');
+  };
+
+  const onCommonOp = (op: string) => {
+    if (mainDisplay !== 0) {
+      if (lastPress === '=') {
+        setHistory(`${mainDisplay} ${op}`);
+        setLeftSide(mainDisplay);
+      } else if (
+        !isNaN(parseInt(lastPress)) &&
+        operator !== '' &&
+        !operations.splice(operations.indexOf(op), 1).includes(op)
+      ) {
+        lastPressNum(op);
+      } else if (leftSide !== 0) {
+        normalOp(op);
+      } else {
+        setLeftSide(mainDisplay);
+        setHistory(`${mainDisplay} ${op}`);
+      }
+      setOperator(op);
+    }
+    setLastPress(op);
+  };
+
+  const normalOp = (op: string) => {
+    let opResult = 0;
+    if (operator === '+') {
+      opResult = leftSide + mainDisplay;
+    } else if (operator === 'x') {
+      opResult = leftSide * mainDisplay;
+    } else if (operator === '/') {
+      opResult = leftSide / mainDisplay;
+    } else if (operator === '-') {
+      opResult = leftSide - mainDisplay;
+    }
+    setLeftSide(opResult);
+    setMainDisplay(opResult);
+    setHistory(`${history} ${mainDisplay} ${op}`);
+  };
+
+  const lastPressNum = (op: string) => {
+    let result = 0;
+    if (operator === '+') {
+      result = leftSide + mainDisplay;
+    } else if (operator === 'x') {
+      result = leftSide + mainDisplay;
+    } else if (operator === '/') {
+      result = leftSide / mainDisplay;
+    } else if (operator === '-') {
+      result = leftSide - mainDisplay;
+    }
+    setHistory(`${history} ${mainDisplay} ${op}`);
+    setLeftSide(result);
+    setMainDisplay(result);
   };
 
   return (
@@ -122,7 +146,7 @@ const Calculator = () => {
             OnClick={(num) => numClick(+num)}
             OppBtn={false}
           />
-          <CalcButton Text="clr" OnClick={(opp) => oppClick(opp)} OppBtn />
+          <CalcButton Text="clr" OnClick={() => onClear()} OppBtn />
           <CalcButton
             Text="4"
             OnClick={(num) => numClick(+num)}
@@ -138,7 +162,7 @@ const Calculator = () => {
             OnClick={(num) => numClick(+num)}
             OppBtn={false}
           />
-          <CalcButton Text="+" OnClick={(opp) => oppClick(opp)} OppBtn />
+          <CalcButton Text="+" OnClick={() => onCommonOp('+')} OppBtn />
           <CalcButton
             Text="1"
             OnClick={(num) => numClick(+num)}
@@ -154,15 +178,15 @@ const Calculator = () => {
             OnClick={(num) => numClick(+num)}
             OppBtn={false}
           />
-          <CalcButton Text="-" OnClick={(opp) => oppClick(opp)} OppBtn />
-          <div className="flex-container">
-            <CalcButton
-              Text="0"
-              OnClick={(num) => numClick(+num)}
-              OppBtn={false}
-            />
-            <CalcButton Text="=" OnClick={(opp) => oppClick(opp)} OppBtn />
-          </div>
+          <CalcButton Text="-" OnClick={() => onCommonOp('-')} OppBtn />
+          <CalcButton
+            Text="0"
+            OnClick={(num) => numClick(+num)}
+            OppBtn={false}
+          />
+          <CalcButton Text="x" OnClick={() => onCommonOp('x')} OppBtn />
+          <CalcButton Text="/" OnClick={() => onCommonOp('/')} OppBtn />
+          <CalcButton Text="=" OnClick={() => onEqual()} OppBtn />
         </div>
       </div>
     </div>
